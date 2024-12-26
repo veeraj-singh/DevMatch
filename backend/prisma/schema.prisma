@@ -82,15 +82,20 @@ enum WorkspaceMemberRole {
 }
 
 model Match {
-  id             Int      @id @default(autoincrement())
-  senderId       Int
-  receiverId     Int
-  senderStatus   String  // e.g., "pending", "accepted", "rejected"
-  receiverStatus String  // e.g., "pending", "accepted", "rejected"
-  createdAt      DateTime @default(now())
+  id                   Int      @id @default(autoincrement())
+  senderId             Int
+  receiverId           Int
+  senderStatus         String   // e.g., "pending", "accepted", "rejected"
+  receiverStatus       String   // e.g., "pending", "accepted", "rejected"
+  createdAt            DateTime @default(now())
+  lastMessage          String?  // Store the last message text
+  lastMessageTimestamp DateTime? // Store the timestamp of the last message
+  unreadCountSender    Int      @default(0)  // Count of unread messages for the sender
+  unreadCountReceiver  Int      @default(0)  // Count of unread messages for the receiver
 
-  sender         User @relation("SentMatches", fields: [senderId], references: [id])
-  receiver       User @relation("ReceivedMatches", fields: [receiverId], references: [id])
+  sender               User     @relation("SentMatches", fields: [senderId], references: [id])
+  receiver             User     @relation("ReceivedMatches", fields: [receiverId], references: [id])
 }
+
 
 

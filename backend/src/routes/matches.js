@@ -224,6 +224,86 @@ router.get("/pending", verifyToken, async (req, res) => {
     }
   });
 
+  router.get('/activechats' , verifyToken , async (req,res) => {
+    const { uid } = req.user; 
+    try {
+      const user = await prisma.user.findUnique({ where: { uid } });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const activeChats = await prisma.match.findMany({
+        where: {
+          OR: [
+            { senderId: user.id },
+            { receiverId: user.id }
+          ]
+        },
+        include: {
+          sender: true,  
+          receiver: true, 
+        }
+      });
+      const activeChatsres = activeChats.map(chat => {
+        const otherUser = chat.senderId === user.id ? chat.receiver : chat.sender;
+        return {
+          id: chat.id,
+          otherUserId: otherUser.id,
+          otherUserName: otherUser.name,
+          otherUserAvatar: otherUser.avatar,
+          lastMessage: chat.lastMessage,
+          lastMessageTimestamp: chat.lastMessageTimestamp,
+          unreadCount: user.id === chat.senderId ? chat.unreadCountReceiver : chat.unreadCountSender,
+        }
+      })
+    
+      res.status(200).json({res:activeChatsres,userId:user.id})
+    }catch (error) {
+      res.status(500).json({ error: 'Failed to fetch active chats' });
+    }
+  });
+
+
+  router.put('/chat/:matchId' , async (req,res) => {
+    const { matchId } = req.params ;
+    const { senderId , message} = req.body ;
+    try {
+      const match = await prisma.match.update({
+        where: { id: matchId },
+        data: {
+          lastMessage: message,  
+          lastMessageTimestamp: new Date(),  
+          unreadCountReceiver: senderId === match.senderId ? match.unreadCountReceiver : match.unreadCountReceiver + 1,
+          unreadCountSender: senderId === match.receiverId ? match.unreadCountSender : match.unreadCountSender + 1,
+        },
+      });
+      res.status(200).json(match);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating chat", error });
+    }
+  });
+
+  router.put('/urc/:matchId' , verifyToken  , async (req,res) => {
+    const { matchId } = req.params ;
+    const { uid } = req.user; 
+    try {
+      const user = await prisma.user.findUnique({ where: { uid } });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const userId = user.id ;
+      const match = await prisma.match.update({
+        where: { id: matchId },
+        data: {
+          unreadCountSender: userId === match.senderId ? 0 : match.unreadCountSender,
+          unreadCountReceiver: userId === match.receiverId ? 0 : match.unreadCountReceiver,
+        },
+      });
+      res.status(200).json(match);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating chat unreadcount", error });
+    }
+  });
+
   module.exports = router;
 
   

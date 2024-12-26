@@ -168,7 +168,7 @@ router.get('/myworkspaces', verifyToken , async (req, res) => {
       role: workspace.members[0]?.role || "UNKNOWN", // Role of the user in this workspace
     }));
 
-    res.status(200).json(workspaces);
+    res.status(200).json({res:workspaces,userId:user.id});
   } catch (error) {
     console.error("Error fetching user workspaces:", error);
     res.status(500).json({ error: "Failed to fetch user workspaces." });
