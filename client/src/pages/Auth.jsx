@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/axios_instance";
@@ -10,8 +10,24 @@ const AuthForm = () => {
   const [isSignUp, setIsSignUp] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [codeIndex, setCodeIndex] = useState(0);
   const googleProvider = new GoogleAuthProvider();
   const navigate = useNavigate();
+
+  const codeSnippets = [
+    'const connect = async () => { await DevMatch.init(); }',
+    'function DevMatch() { return <PerfectMatch />; }',
+    'while(true) { code.write(); coffee.drink(); }',
+    'git commit -m "Found perfect dev match! 🚀"',
+    'npm install perfect-dev-partner@latest'
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCodeIndex((prev) => (prev + 1) % codeSnippets.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const adduser = async () => {
     api.post('/api/user', {
@@ -20,7 +36,6 @@ const AuthForm = () => {
       }})
     .then(response => {
       const data = response.data;
-      console.log(data)
       if (data.firstTime) {
         navigate('/onboarding');
       } else {
@@ -40,15 +55,14 @@ const AuthForm = () => {
       let userCredential;
       if (isSignUp) {
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        setSuccess("User registered successfully!");
+        setSuccess("Successfully initialized dev environment! 🚀");
       } else {
         userCredential = await signInWithEmailAndPassword(auth, email, password);
-        setSuccess("User logged in successfully!");
+        setSuccess("Authentication successful! Welcome back, developer! 💻");
       }
-      console.log("User:", userCredential.user);
-      adduser()
+      adduser();
     } catch (err) {
-      setError(err.message);
+      setError(`Error ${err.code}: ${err.message}`);
     }
   };
 
@@ -57,11 +71,10 @@ const AuthForm = () => {
     setSuccess("");
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
-      console.log("Google User:", userCredential.user);
-      setSuccess("User logged in with Google!");
-      adduser()
+      setSuccess("OAuth authentication successful! 🔐");
+      adduser();
     } catch (err) {
-      setError(err.message);
+      setError(`Authentication failed: ${err.message}`);
     }
   };
 
@@ -71,99 +84,89 @@ const AuthForm = () => {
       <div className="absolute inset-0">
         {/* Code Pattern Background */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 right-0 overflow-hidden whitespace-nowrap font-mono text-[#06c270] text-xs">
-            &lt;DevMatch/&gt; {"{"}matchmaking_for_devs{"}"} &lt;code&gt;build_something_amazing&lt;/code&gt;
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 overflow-hidden whitespace-nowrap font-mono text-[#06c270] text-xs transform rotate-180">
-            while(coding) {"{"} find_your_match(); {"}"}
-          </div>
+          {Array.from({ length: 15 }).map((_, i) => (
+            <div
+              key={i}
+              className="font-mono text-[#06c270] text-xs whitespace-nowrap animate-slide"
+              style={{ animationDelay: `${i * 0.3}s` }}
+            >
+              {codeSnippets[codeIndex]}
+            </div>
+          ))}
         </div>
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#2b2b2b]/50 to-transparent"></div>
-        
-        {/* Brand Elements */}
-        <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-center">
-          <div className="text-4xl font-bold bg-gradient-to-r from-[#06c270] to-[#08b864] text-transparent bg-clip-text">DevMatch</div>
-          <div className="text-[#7d7d7d] text-sm mt-1">Where Developers Connect</div>
-        </div>
       </div>
 
       <div className="w-full max-w-md bg-[#2b2b2b] shadow-2xl rounded-2xl overflow-hidden relative z-10">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#06c270] to-[#08b864] p-6 text-center">
-          <h2 className="text-3xl font-bold text-white">
-            {isSignUp ? "Create Account" : "Welcome Back"}
+        {/* Terminal-like header */}
+        <div className="bg-gradient-to-r from-[#06c270] to-[#08b864] p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <div className="flex space-x-2">
+              <div className="w-3 h-3 rounded-full bg-white-500"></div>
+              <div className="w-3 h-3 rounded-full bg-white-500"></div>
+              <div className="w-3 h-3 rounded-full bg-white-500"></div>
+            </div>
+            <div className="flex-1 text-center font-mono text-white/80">
+              {isSignUp ? "~/create-new-account" : "~/login"}
+            </div>
+          </div>
+          <h2 className="text-3xl font-bold text-white text-center">
+            {isSignUp ? "$ npm init dev-account" : "$ ssh user@devmatch"}
           </h2>
-          <p className="text-white/80 mt-2">
-            {isSignUp
-              ? "Sign up to start your journey"
-              : "Log in to continue"}
+          <p className="text-white/80 mt-2 text-center font-mono">
+            {isSignUp ? "Installing dependencies..." : "Establishing secure connection..."}
           </p>
         </div>
 
-        {/* Form Container */}
         <div className="p-6 space-y-6 text-[#e1e1e1]">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="relative">
+            <div className="relative group">
               <input
                 type="email"
-                placeholder="Email Address"
+                placeholder="email.address@domain.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-[#3a3a3a] border border-[#4a4a4a] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06c270] transition duration-300 ease-in-out placeholder-[#7d7d7d] font-mono"
                 required
-                className="w-full px-4 py-3 bg-[#3a3a3a] border border-[#4a4a4a] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06c270] transition duration-300 ease-in-out placeholder-[#7d7d7d]"
               />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 absolute right-4 top-1/2 transform -translate-y-1/2 text-[#7d7d7d]"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <span className="text-[#7d7d7d] group-hover:text-[#06c270] transition-colors duration-300">@</span>
+              </div>
             </div>
 
-            <div className="relative">
+            <div className="relative group">
               <input
                 type="password"
-                placeholder="Password"
+                placeholder="****************"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 bg-[#3a3a3a] border border-[#4a4a4a] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06c270] transition duration-300 ease-in-out placeholder-[#7d7d7d] font-mono"
                 required
-                className="w-full px-4 py-3 bg-[#3a3a3a] border border-[#4a4a4a] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#06c270] transition duration-300 ease-in-out placeholder-[#7d7d7d]"
               />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 absolute right-4 top-1/2 transform -translate-y-1/2 text-[#7d7d7d]"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <span className="text-[#7d7d7d] group-hover:text-[#06c270] transition-colors duration-300">#</span>
+              </div>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-[#06c270] to-[#08b864] text-white py-3 rounded-lg hover:opacity-90 transition duration-300 ease-in-out transform hover:scale-[1.02] shadow-lg"
+              className="w-full bg-gradient-to-r from-[#06c270] to-[#08b864] text-white py-3 rounded-lg hover:opacity-90 transition duration-300 ease-in-out transform hover:scale-[1.02] font-mono"
             >
-              {isSignUp ? "Sign Up" : "Log In"}
+              {isSignUp ? "$ create-account --init" : "$ login --auth"}
             </button>
           </form>
 
-          {/* Divider */}
           <div className="flex items-center justify-center space-x-4">
             <div className="h-px bg-[#4a4a4a] flex-grow"></div>
-            <span className="text-[#7d7d7d] text-sm">or</span>
+            <span className="text-[#7d7d7d] font-mono">||</span>
             <div className="h-px bg-[#4a4a4a] flex-grow"></div>
           </div>
 
-          {/* Google Sign In */}
           <button
             onClick={handleGoogleSignIn}
-            className="w-full flex items-center justify-center space-x-3 py-3 border border-[#4a4a4a] rounded-lg hover:bg-[#3a3a3a] transition duration-300 ease-in-out"
+            className="w-full flex items-center justify-center space-x-3 py-3 border border-[#4a4a4a] rounded-lg hover:bg-[#3a3a3a] transition duration-300 ease-in-out group"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -176,31 +179,29 @@ const AuthForm = () => {
               <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
               <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
             </svg>
-            <span className="text-[#e1e1e1]">Continue with Google</span>
+            <span className="text-[#e1e1e1] font-mono group-hover:text-[#06c270] transition-colors duration-300">
+              auth --provider=google
+            </span>
           </button>
 
-          {/* Toggle Sign Up/Login */}
           <div className="text-center">
             <button
               onClick={() => setIsSignUp((prev) => !prev)}
-              className="text-[#06c270] hover:text-[#08b864] text-sm transition duration-300 ease-in-out"
+              className="text-[#06c270] hover:text-[#08b864] transition duration-300 ease-in-out font-mono text-sm"
             >
-              {isSignUp
-                ? "Already have an account? Log in"
-                : "Don't have an account? Sign up"}
+              {isSignUp ? "$ cd ../login" : "$ cd ../signup"}
             </button>
           </div>
         </div>
 
-        {/* Status Messages */}
-        {success && (
-          <div className="bg-[#292929] border-l-4 border-[#06c270] text-[#06c270] p-4 mx-6 mb-4 rounded-lg">
-            <p>{success}</p>
-          </div>
-        )}
-        {error && (
-          <div className="bg-[#3a1a1a] border-l-4 border-[#e5554f] text-[#e5554f] p-4 mx-6 mb-4 rounded-lg">
-            <p>{error}</p>
+        {(success || error) && (
+          <div className={`p-4 font-mono text-sm ${
+            success ? "bg-[#292929] border-l-4 border-[#06c270] text-[#06c270]" : 
+                     "bg-[#3a1a1a] border-l-4 border-[#e5554f] text-[#e5554f]"
+          }`}>
+            <pre className="whitespace-pre-wrap">
+              {success ? `> ${success}` : `Error: ${error}`}
+            </pre>
           </div>
         )}
       </div>

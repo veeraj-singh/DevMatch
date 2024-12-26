@@ -4,7 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Onboarding from './pages/Onboard';
 import CreateProject from './pages/CreateProject';
 import Workspaces from './pages/WorkSpace';
-import DirectMessages from './pages/Messages';
+import DirectMessages from './pages/DirectMessages';
 import MatchExplorer from './pages/MatchExplorer';
 import Profile from './pages/Profile';
 import MainLayout from './components/layout';

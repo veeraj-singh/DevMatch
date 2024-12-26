@@ -79,7 +79,7 @@ const Dashboard = () => {
               <Terminal className="mr-3" /> DevMatch Dashboard
             </h1>
             <p className="text-gray-400 mt-2">
-              Collaborate, Create, Connect
+              Create, Connect, Collaborate
             </p>
           </div>
           <button

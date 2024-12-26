@@ -178,7 +178,7 @@ const MatchExplorer = () => {
                   onClick={() => handleProfileSelect(friend, 'friends')}
                 >
                   <div className="flex items-center">
-                    <img src={friend.avatar} alt={friend.name} className="w-10 h-10 rounded-full mr-3" />
+                    <img src={friend.avatar || 'https://avatar.iran.liara.run/public/9'} alt={friend.name} className="w-10 h-10 rounded-full mr-3" />
                     <div>
                       <p className="font-semibold text-white">{friend.name}</p>
                       <p className="text-sm text-gray-400">{friend.email}</p>

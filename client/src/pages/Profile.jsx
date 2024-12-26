@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import api from "../utils/axios_instance";
 import { Edit3, User, Trash2 } from "lucide-react";
+import ProfileSkeleton from "../components/profileskeleton";
 
 const Profile = () => {
-  // ... existing state declarations remain the same ...
   const [userInfo, setUserInfo] = useState({
     name: "",
     avatarUrl: "",
@@ -13,25 +13,31 @@ const Profile = () => {
     experience: null,
     location: "",
   });
-  const [projects, setProjects] = useState([]);
-  const [editIndex, setEditIndex] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [projects, setProjects] = useState([]); // State for projects
+  const [editIndex, setEditIndex] = useState(null); // Track project being edited
+  const [editMode, setEditMode] = useState(false); // Toggle edit mode
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
 
-  // ... existing useEffect and handler functions remain the same ...
+  // Fetch user info from the backend
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         setLoading(true);
+    
         const userResponse = await api.get('/api/user', {
-          headers: { 'Content-Type': 'application/json' }
-        });
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+
         const projectsResponse = await api.get('/api/project', {
-          headers: { 'Content-Type': 'application/json' }
-        });
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
         
-        const userInfo = userResponse.data;
+        const userInfo = userResponse.data ;
         const projects = projectsResponse.data;
     
         setUserInfo(userInfo.data);
@@ -47,13 +53,80 @@ const Profile = () => {
     fetchUserInfo();
   }, []);
 
-  // ... other existing handler functions remain the same ...
+  const handleInputChange = (field, value) => {
+    setUserInfo({ ...userInfo, [field]: value });
+  };
+
+  const handleSave = async () => {
+    try {
+      const response = await api.put("/api/user", userInfo, {
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+    
+      if (response.status !== 200) {
+        throw new Error("Failed to save user information.");
+      }
+    
+      alert("Profile updated successfully!");
+      setEditMode(false);
+    } catch (err) {
+      console.error("Error saving user info:", err);
+      alert("Failed to save user information. Please try again.");
+    }
+  };
+
+  const handleProjectEdit = (index, field, value) => {
+    const updatedProjects = [...projects];
+    updatedProjects[index][field] = value;
+    setProjects(updatedProjects);
+  };
+
+  const handleSaveProject = async (project) => {
+    try {
+      const response = await api.put(
+        `/api/project/${project.id}`,
+        project,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+  
+      if (response.status !== 200) {
+        throw new Error("Failed to save project.");
+      }
+  
+      alert(`Project "${project.title}" updated successfully!`);
+      setEditIndex(null); // Exit edit mode
+    } catch (error) {
+      console.error("Error saving project:", error);
+      alert("Failed to save project. Please try again.");
+    }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this project?");
+    if (!confirmDelete) return;
+    console.log(projectId)
+    try {
+      const response = await api.delete(`/api/project/${projectId}`, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+  
+      if (response.status !== 204) {
+        throw new Error("Failed to delete project.");
+      }
+  
+      setProjects(projects.filter((project) => project.id !== projectId));
+      alert("Project deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      alert("Failed to delete project. Please try again.");
+    }
+  };
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
-        <p className="text-lg font-semibold">Loading...</p>
-      </div>
+      <ProfileSkeleton/>
     );
   }
 
@@ -88,7 +161,7 @@ const Profile = () => {
             <div className="flex items-start space-x-6">
               <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-700">
                 <img
-                  src={userInfo.avatarUrl || "/api/placeholder/128/128"}
+                  src={userInfo.avatarUrl || `https://avatar.iran.liara.run/public/2`}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
@@ -104,7 +177,71 @@ const Profile = () => {
                     className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-green-500"
                   />
                 </div>
-                {/* ... other form fields remain the same ... */}
+                <div>
+                <label className="block text-gray-400 mb-1">Avatar URL</label>
+                <input
+                  type="text"
+                  value={userInfo.avatarUrl}
+                  onChange={(e) => handleInputChange("avatarUrl", e.target.value)}
+                  className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-400 mb-1">Bio</label>
+                <textarea
+                  value={userInfo.bio}
+                  onChange={(e) => handleInputChange("bio", e.target.value)}
+                  rows="3"
+                  className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-400 mb-1">Skills</label>
+                <input
+                  type="text"
+                  value={userInfo.skills?.join(", ")}
+                  onChange={(e) =>
+                    handleInputChange("skills", e.target.value.split(",").map((s) => s.trim()))
+                  }
+                  className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-400 mb-1">Interests</label>
+                <input
+                  type="text"
+                  value={userInfo.interests?.join(", ")}
+                  onChange={(e) =>
+                    handleInputChange("interests", e.target.value.split(",").map((i) => i.trim()))
+                  }
+                  className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-400 mb-1">Experience (years)</label>
+                <input
+                  type="number"
+                  value={userInfo.experience || ""}
+                  onChange={(e) =>
+                    handleInputChange("experience", parseInt(e.target.value, 10) || null)
+                  }
+                  className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-400 mb-1">Location</label>
+                <input
+                  type="text"
+                  value={userInfo.location}
+                  onChange={(e) => handleInputChange("location", e.target.value)}
+                  className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
+                />
+              </div>
               </div>
             </div>
             <button
@@ -118,7 +255,7 @@ const Profile = () => {
           <div className="flex items-start space-x-6">
             <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-700">
               <img
-                src={userInfo.avatarUrl || "/api/placeholder/128/128"}
+                src={userInfo.avatarUrl || `https://avatar.iran.liara.run/public/2`}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
