@@ -61,7 +61,7 @@ router.put("/:id", verifyToken, async (req, res) => {
         const receiver = await prisma.user.findUnique({ where: { uid } });
         if (!receiver) return res.status(404).json({ message: "Receiver not found" });
         
-        console.log(status)
+        // console.log(status)
         const updatedMatch = await prisma.match.update({
             where: { id: parseInt(id) },
             data: { senderStatus: status, receiverStatus: status },
