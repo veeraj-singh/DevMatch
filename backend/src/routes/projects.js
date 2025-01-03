@@ -94,7 +94,7 @@ router.put("/:id", verifyToken, async (req, res) => {
 
 router.delete("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-  console.log(id)
+  // console.log(id)
   try {
     await prisma.$transaction([
       // Delete project interests
@@ -219,7 +219,7 @@ router.put('/:projectId/interests/:interestId/respond', verifyToken , async (req
 
   try {
     // Update interest status in transaction
-    console.log(status)
+    // console.log(status)
     const updatedInterest = await prisma.$transaction(async (tx) => {
       // Update interest status
       const interest = await tx.projectInterest.update({
@@ -266,7 +266,7 @@ router.get('/:projectId/interests', verifyToken ,async (req, res) => {
   const { status } = req.query;
 
   try {
-    console.log(status)
+    // console.log(status)
     const interests = await prisma.projectInterest.findMany({
       where: {
         projectId: parseInt(projectId),
