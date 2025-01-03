@@ -43,7 +43,7 @@ router.patch('/:taskId', async (req, res) => {
       { status },
       {new: true}
     );
-    console.log(task)
+    // console.log(task)
     if (!task) {
       return res.status(404).json({ error: 'Task not found' });
     }
