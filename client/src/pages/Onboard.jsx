@@ -120,14 +120,41 @@ const Onboard = () => {
                   value={formData.name}
                   onChange={handleChange}
                 />
-                <input
-                  type="text"
-                  name="avatarUrl"
-                  placeholder="Avatar URL"
-                  className="w-full p-3 bg-[#3a3a3a] border border-[#4a4a4a] rounded-lg focus:ring-2 focus:ring-[#06c270] focus:outline-none"
-                  value={formData.avatarUrl}
-                  onChange={handleChange}
-                />
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-200">
+                    Choose your avatar
+                  </label>
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { id: 1, url: 'https://avatar.iran.liara.run/public/41', label: 'Avatar 1' },
+                      { id: 2, url: 'https://avatar.iran.liara.run/public/12', label: 'Avatar 2' },
+                      { id: 3, url: 'https://avatar.iran.liara.run/public/36', label: 'Avatar 3' },
+                      { id: 4, url: 'https://avatar.iran.liara.run/public/68', label: 'Avatar 4' },
+                      { id: 5, url: 'https://avatar.iran.liara.run/public/43', label: 'Avatar 5' },
+                      { id: 6, url: 'https://avatar.iran.liara.run/public/girl', label: 'Avatar 6' }
+                    ].map((avatar) => (
+                      <button
+                        key={avatar.id}
+                        onClick={() => handleChange({
+                          target: { name: 'avatarUrl', value: avatar.url }
+                        })}
+                        className={`p-2 rounded-lg border-2 transition-all ${
+                          formData.avatarUrl === avatar.url
+                            ? 'border-[#06c270] bg-[#06c270]/10'
+                            : 'border-[#4a4a4a] hover:border-[#06c270]/50'
+                        }`}
+                      >
+                        <img
+                          src={avatar.url}
+                          alt={avatar.label}
+                          className="w-16 h-16 rounded-full mx-auto"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <textarea
                   name="bio"
                   placeholder="Tell us about yourself"
