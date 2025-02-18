@@ -16,7 +16,8 @@ import {
   Layers,
   Space,
   Grid,
-  FolderOpen
+  FolderOpen,
+  Gamepad
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -59,6 +60,11 @@ const Sidebar = () => {
         icon: <User className="w-5 h-5" />, 
         text: "Profile", 
         route: "/profile" 
+    },
+    { 
+        icon: <Gamepad className="w-5 h-5" />, 
+        text: "Wordgame", 
+        route: "/wordgame" 
     },
   ];
 

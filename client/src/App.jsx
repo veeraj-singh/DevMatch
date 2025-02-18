@@ -6,6 +6,7 @@ import CreateProject from './pages/CreateProject';
 import Workspaces from './pages/WorkSpace';
 import DirectMessages from './pages/DirectMessages';
 import MatchExplorer from './pages/MatchExplorer';
+import TypingRace from './pages/wordgame';
 import Profile from './pages/Profile';
 import MainLayout from './components/layout';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -33,6 +34,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<AuthForm />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/wordgame" element={<TypingRace />} />
 
         {/* Protected Routes */}
         <Route element={<MainLayout />}>

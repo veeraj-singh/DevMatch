@@ -7,7 +7,6 @@ const mongoose = require('mongoose');
 const { MatchMessage , WorkspaceMessage } = require('./message_model') ;
 require('dotenv').config();
 
-
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log('Connected to MongoDB'))
@@ -26,6 +25,11 @@ const io = new Server(server, {
 app.get('/',(req,res)=>{
   res.json({message:"I am running"})
 })
+
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 
   io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
