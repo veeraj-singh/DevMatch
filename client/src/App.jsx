@@ -9,6 +9,7 @@ import MatchExplorer from './pages/MatchExplorer';
 import TypingRace from './pages/wordgame';
 import Profile from './pages/Profile';
 import MainLayout from './components/layout';
+import LandingPage from './pages/Landingpage';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { auth } from './utils/firebase'; // Firebase auth
 
@@ -32,7 +33,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<AuthForm />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/auth" element={<AuthForm />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/wordgame" element={<TypingRace />} />
 
